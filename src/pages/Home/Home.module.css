@@ -1,0 +1,13 @@
+.home{
+    background-color: #f8f8f8;
+    display: flex ;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    height: 100vh;
+}
+@media screen and (min-width: 1000px) {
+    .home{
+        font-size: 100px; 
+    }
+}

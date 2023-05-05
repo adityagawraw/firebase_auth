@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import classes from "./Login.module.css";
 import { app } from "../../firebaseConfig";
+import { login } from "../../features/auth-slice";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -8,36 +9,64 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 const Login = () => {
-  const [login, setLogin] = useState(true);
+  const [signin, setSignin] = useState(true);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const auth = getAuth();
   const handleLoginViaEmail = (e) => {
     e.preventDefault();
-    !login
+    !signin
       ? createUserWithEmailAndPassword(
           auth,
           loginData.email,
           loginData.password
         )
-          .then((res) => alert(res.user))
-          .catch((err) => alert(err.message))
+          .then((res) => {
+            dispatch(login());
+            toast.success("Congrates you hava registered ");
+            navigate('/');
+            console.log(res.user);
+          })
+          .catch((err) => {
+            toast.error(err.message);
+            console.log(err);
+          })
       : signInWithEmailAndPassword(auth, loginData.email, loginData.password)
-          .then((res) => alert(res.user))
-          .catch((err) => alert(err.message));
+          .then((res) => {
+            dispatch(login());
+            toast.success("Welcome back !! ");
+            navigate('/');
+            console.log(res.user);
+          })
+          .catch((err) => {
+            toast.error(err.message);
+            console.log(err.message);
+          });
   };
   const googleProvider = new GoogleAuthProvider();
   const signinWithGoogle = () => {
     signInWithPopup(auth, googleProvider)
-      .then((res) => alert(res.user))
-      .catch((err) => alert(err.message));
+    .then((res) => {
+        dispatch(login());
+        toast.success("Congrates you hava registered ");
+        navigate('/');
+        console.log(res.user);
+      })
+      .catch((err) => {
+        toast.error(err.message);
+        console.log(err.message);
+      })
   };
 
   return (
     <div className={classes.loginPage}>
       <div className={classes.userAuth}>
-        {login ? (
+        {signin ? (
           <p className={classes.heading}>Login to your Account </p>
         ) : (
           <p className={classes.heading}>Register for Account</p>
@@ -71,28 +100,33 @@ const Login = () => {
             />
           </div>
           <button className={classes.loginButton}>
-            {login ? <div>Sign In</div> : <div>Sign up</div>}
+            {signin ? <div>Sign In</div> : <div>Sign up</div>}
           </button>
         </form>
-        {login ? (
+        {signin ? (
           <button
             className={classes.changeLogin}
-            onClick={() => setLogin(false)}
+            onClick={() => setSignin(false)}
           >
             Create a new Account
           </button>
         ) : (
           <button
             className={classes.changeLogin}
-            onClick={() => setLogin(true)}
+            onClick={() => setSignin(true)}
           >
             Login to existing Account
           </button>
         )}
         <p>OR</p>
         <button className={classes.withgoogle} onClick={signinWithGoogle}>
-            <img src="/image/googlepic.png" alt=""  className={classes.withgoogleImg}/>
-            Sign up with Google</button>
+          <img
+            src="/image/googlepic.png"
+            alt=""
+            className={classes.withgoogleImg}
+          />
+          Sign up with Google
+        </button>
       </div>
     </div>
   );
